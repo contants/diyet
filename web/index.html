@@ -1,0 +1,697 @@
+<!doctype html>
+<!-- CELIK-WEB -->
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Diyet</title>
+<style>
+@font-face{font-family:"Archivo";src:url(fonts/Archivo.ttf) format("truetype");font-weight:100 900;font-stretch:62% 125%}
+@font-face{font-family:"Manrope";src:url(fonts/Manrope.ttf) format("truetype");font-weight:200 800}
+@font-face{font-family:"JetBrains Mono";src:url(fonts/JetBrainsMono.ttf) format("truetype");font-weight:100 800}
+
+/* Layout: tek sütun telefon, tablette iki sütun; yaprak yeşili vurgu, açık doğa tonlarında yüzeyler */
+:root{
+  --bg:#F2F6EF; --surface:#FFFFFF; --raised:#F6F9F3; --ink:#1E2A1F; --muted:#5F6E60; --line:#DCE6D7;
+  --accent:#3E8E4E; --accent-ink:#FFFFFF; --accent-soft:#E0F0DC;
+  --p:#3D74A8; --c:#C9862A; --f:#B5527A;
+  --good:#2F8A60; --warn:#B7791F; --warn-soft:#F8ECD6; --bad:#C0392B; --bad-soft:#F7DEDA;
+  --scrim:rgba(242,246,239,.95);
+  --shadow:0 1px 2px rgba(30,42,31,.05),0 4px 14px rgba(30,42,31,.05);
+  --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --font-body:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F1610; --surface:#172119; --raised:#1D2A1F; --ink:#E3EDE2; --muted:#93A694; --line:#2A3A2C;
+    --accent:#7CC88A; --accent-ink:#0F1610; --accent-soft:#1E3524;
+    --p:#86B3E0; --c:#E3AE57; --f:#E28DB0;
+    --good:#62C596; --warn:#E3AE57; --warn-soft:#352A16; --bad:#E58080; --bad-soft:#3A1E1A;
+    --scrim:rgba(15,22,16,.95);
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,.tabbar,.chip,.label,h1{-webkit-user-select:none;user-select:none}
+[hidden]{display:none!important}
+.app{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:14px 104px}
+h1{font-family:var(--font-display);font-weight:800;font-stretch:88%;font-size:34px;line-height:1.02;margin:0;letter-spacing:-.01em}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.tab{display:flex;flex-direction:column;gap:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.cols{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.label{font-family:var(--font-display);font-weight:700;font-stretch:90%;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.greet{font-size:14px;color:var(--muted);font-weight:600}
+.empty{background:var(--raised);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;color:var(--muted);font-size:14px;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:15px 18px;font-weight:800;font-size:16px;width:100%}
+.primary:disabled{opacity:.5}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-weight:700;width:100%}
+.ghost.bad{color:var(--bad);border-color:var(--bad)}
+.link{background:none;border:0;color:var(--accent);font-weight:800;padding:6px 2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--raised);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+select,input[type=number],input[type=text],input[type=password],input[type=time],input[type=search],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;min-width:0}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.switch input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+
+/* Bugün */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.ring{width:132px;height:132px;position:relative}
+.ring svg{width:100%;height:100%;display:block}
+.r-trk{fill:none;stroke:var(--line);stroke-width:12}
+.r-val{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .6s}
+.r-val.over{stroke:var(--bad)}
+.ring .ctr{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1.05}
+.ring .ctr b{font-family:var(--font-mono);font-size:26px;display:block}
+.ring .ctr small{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.macros{display:flex;flex-direction:column;gap:9px;min-width:0}
+.mac{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;font-size:13px}
+.mac b{font-weight:800}
+.mac span{font-family:var(--font-mono);color:var(--muted);font-size:12px}
+.bar{grid-column:1/-1;height:7px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.act{border:0;border-radius:16px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:13px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);position:relative}
+.act span{font-size:26px}
+.act.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.act input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.meal{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.meal:last-child{border-bottom:0}
+.thumb{width:56px;height:56px;border-radius:14px;object-fit:cover;background:var(--raised);display:grid;place-items:center;font-size:26px;grid-row:span 2}
+.meal .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meal .kc{font-family:var(--font-mono);font-weight:700}
+.meal .sub{font-size:12px;color:var(--muted);grid-column:2/-1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-h{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:6px;display:flex;justify-content:space-between}
+
+/* Sayfalar */
+.overlay{position:fixed;inset:0;background:var(--scrim);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;display:flex;flex-direction:column;gap:12px;max-height:94%;overflow:auto;box-shadow:0 -6px 30px rgba(0,0,0,.12)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center}
+.sheet-head h3{margin:0;font-family:var(--font-display);font-stretch:88%;font-size:22px;font-weight:800}
+.photo{width:100%;max-height:240px;object-fit:cover;border-radius:16px;display:block}
+.spin{display:flex;align-items:center;gap:12px;font-weight:700;color:var(--muted)}
+.spin i{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp 0.9s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.irow{display:grid;grid-template-columns:minmax(0,1fr) 84px 34px;gap:6px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.irow input{padding:9px}
+.irow .por{grid-column:1/-1;font-size:12px;color:var(--muted)}
+.x{background:none;border:1px solid var(--line);border-radius:10px;width:34px;height:38px;color:var(--muted);font-size:18px;padding:0}
+.total{display:flex;justify-content:space-between;font-weight:800;font-size:17px}
+.total b{font-family:var(--font-mono)}
+.msg{border-radius:14px;padding:12px 14px;font-size:14px;background:var(--warn-soft);color:var(--warn);font-weight:600}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+.foods{display:flex;flex-direction:column;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:14px}
+.food{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;padding:9px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left}
+.food:last-child{border-bottom:0}
+.food small{color:var(--muted);font-size:12px;grid-column:1}
+.food b{font-family:var(--font-mono);font-size:13px;grid-row:span 2;align-self:center}
+
+/* İlerleme */
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);min-width:0}
+.stat .v{font-family:var(--font-mono);font-weight:700;font-size:18px;line-height:1.15}
+.stat .k{font-size:12px;color:var(--muted);font-weight:600}
+.chart svg{width:100%;display:block}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}
+.chart .dot{fill:var(--accent)}
+.chart .tg{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 5}
+.chart .b{fill:var(--accent)} .chart .b.over{fill:var(--bad)}
+.chart text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.calc{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:14px}
+.calc b{font-family:var(--font-mono)}
+.steps{margin:0;padding-left:20px;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+
+/* Sekmeler */
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabbar-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tabbar button{background:none;border:0;border-radius:12px;padding:7px 2px 5px;font-size:11px;font-weight:800;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabbar button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabbar button[aria-current="page"]{color:var(--accent)}
+.tabbar button[aria-current="page"] svg{background:var(--accent-soft);border-radius:10px;padding:2px 10px;width:43px;height:27px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:40;max-width:calc(100% - 32px);text-align:center}
+.upbar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:15;max-width:520px;margin:0 auto;background:var(--accent);color:var(--accent-ink);border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px}
+.upbar span{flex:1;font-size:14px;font-weight:700}
+.upbar button{background:var(--accent-ink);color:var(--accent);border:0;border-radius:10px;padding:9px 14px;font-weight:800}
+.upbar .x2{background:transparent;color:var(--accent-ink);padding:9px 8px;font-size:18px}
+@media (prefers-reduced-motion: reduce){.r-val{transition:none}.spin i{animation:none}}
+@media (min-width: 820px){
+  .app{max-width:1040px;padding-inline:28px}
+  .cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  h1{font-size:40px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="tab-bugun" class="tab"></section>
+  <section id="tab-ilerleme" class="tab" hidden></section>
+  <section id="tab-ayarlar" class="tab" hidden>
+    <h1>Ayarlar</h1>
+    <div class="cols">
+      <div class="col">
+        <div class="card tab">
+          <span class="label">Profil ve hedef</span>
+          <div class="row2">
+            <div class="field"><label class="note" for="pSex">Cinsiyet</label><select id="pSex"><option value="m">Erkek</option><option value="f">Kadın</option></select></div>
+            <div class="field"><label class="note" for="pAge">Yaş</label><input type="number" id="pAge" min="14" max="90" inputmode="numeric"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label class="note" for="pH">Boy (cm)</label><input type="number" id="pH" min="120" max="230" inputmode="numeric"></div>
+            <div class="field"><label class="note" for="pW">Kilo (kg)</label><input type="number" id="pW" min="30" max="300" step="0.1" inputmode="decimal"></div>
+            <div class="field"><label class="note" for="pT">Hedef (kg)</label><input type="number" id="pT" min="30" max="300" step="0.1" inputmode="decimal"></div>
+          </div>
+          <div class="field"><label class="note" for="pAct">Hareket düzeyi</label>
+            <select id="pAct"><option value="1.2">Çoğunlukla oturarak</option><option value="1.375">Hafif hareketli (haftada 1–3 spor)</option><option value="1.55">Orta (haftada 3–5 spor)</option><option value="1.725">Çok hareketli (neredeyse her gün)</option></select></div>
+          <div class="field"><label class="note" for="pPace">Haftalık hız</label>
+            <select id="pPace"><option value="0.25">Yavaş · haftada 0,25 kg</option><option value="0.5">Dengeli · haftada 0,5 kg</option><option value="0.75">Hızlı · haftada 0,75 kg</option></select></div>
+          <div class="calc" id="calcBox"></div>
+          <button class="primary" id="saveProfile">Kaydet</button>
+          <p class="note">Hesap Mifflin-St Jeor formülüyle yapılır; günlük kalori asla güvenli alt sınırın (erkek 1500, kadın 1200 kcal) altına inmez. Bu bir tahmindir, tıbbi tavsiye değildir.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card tab">
+          <span class="label">Fotoğraftan kalori (Claude)</span>
+          <div class="field"><label class="note" for="aiKey">Anthropic API anahtarı</label><input type="password" id="aiKey" autocomplete="off" placeholder="sk-ant-..."></div>
+          <div class="row2">
+            <div class="field"><label class="note" for="aiCap">Aylık sınır ($)</label><input type="number" id="aiCap" min="0.5" max="100" step="0.5" inputmode="decimal"></div>
+            <div class="field"><span class="note">Bu ay harcanan</span><div class="mono" id="aiSpent" style="padding:12px 0;font-weight:700"></div></div>
+          </div>
+          <button class="ghost" id="saveAi">Kaydet</button>
+          <details>
+            <summary class="link">API anahtarı nasıl alınır?</summary>
+            <ol class="steps">
+              <li>console.anthropic.com adresinde hesap aç.</li>
+              <li>Billing bölümünden kredi yükle (örneğin 5 $).</li>
+              <li>Limits bölümünden aylık harcama sınırını 5 $ yap (ikinci güvenlik).</li>
+              <li>API Keys → Create Key; anahtarı kopyalayıp buraya yapıştır.</li>
+            </ol>
+          </details>
+          <p class="note">Anahtar yalnızca bu telefonda saklanır, hiçbir yere yüklenmez. Fotoğraf yalnızca analiz için Anthropic'e gönderilir. Aylık sınıra gelince uygulama yeni analiz göndermez; yemekleri listeden eklemeye devam edebilirsin.</p>
+        </div>
+        <div class="card tab">
+          <label class="switch"><span class="label">Öğün hatırlatmaları</span><input type="checkbox" id="remOn"></label>
+          <div class="row3"><input type="time" id="rt0" aria-label="Kahvaltı"><input type="time" id="rt1" aria-label="Öğle"><input type="time" id="rt2" aria-label="Akşam"></div>
+          <p class="note">O saatten önceki 90 dakikada öğün eklediysen hatırlatma gelmez.</p>
+        </div>
+        <div class="card tab">
+          <span class="label">Güncellemeler</span>
+          <p class="note" id="aboutTxt"></p>
+          <p class="note" id="upStatus">Uygulama her açılışta yeni sürümü kendisi kontrol eder.</p>
+          <button class="ghost" id="upCheck">Güncellemeleri kontrol et</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar" aria-label="Bölümler">
+  <div class="tabbar-in">
+    <button data-tab="bugun"><svg viewBox="0 0 24 24"><path d="M12 21c-4-2-7-6-7-11a7 7 0 0 1 7-7c0 4 3 7 7 7 0 5-3 9-7 11z"/><path d="M12 21V10"/></svg>Bugün</button>
+    <button data-tab="ilerleme"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/></svg>İlerleme</button>
+    <button data-tab="ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Ayarlar</button>
+  </div>
+</nav>
+
+<!-- Fotoğraf analizi / öğün düzenleme -->
+<div id="mealSheet" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="msTitle">
+  <div class="sheet">
+    <div class="sheet-head"><h3 id="msTitle">Öğün</h3><button class="link" id="msClose">Kapat</button></div>
+    <img class="photo" id="msPhoto" alt="" hidden>
+    <div id="msAsk" class="tab" hidden>
+      <input type="text" id="msHint" maxlength="120" placeholder="İstersen kısa not: 2 şekerli çay, yarısını yedim…">
+      <button class="primary" id="msAnalyze">Kalorisini bul</button>
+      <p class="note" id="msCost"></p>
+    </div>
+    <div class="spin" id="msSpin" hidden><i></i>Claude yemeğine bakıyor…</div>
+    <div class="msg" id="msMsg" hidden></div>
+    <div id="msEdit" class="tab" hidden>
+      <div id="msItems"></div>
+      <button class="link" id="msAddRow" style="align-self:flex-start">+ Satır ekle</button>
+      <div class="chips" id="msSlots"></div>
+      <div class="total"><span>Toplam</span><b id="msTotal">0 kcal</b></div>
+      <p class="note" id="msNote"></p>
+      <button class="primary" id="msSave">Kaydet</button>
+      <button class="ghost bad" id="msDel" hidden>Öğünü sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- Listeden ekle -->
+<div id="foodSheet" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="fsTitle">
+  <div class="sheet">
+    <div class="sheet-head"><h3 id="fsTitle">Elle ekle</h3><button class="link" id="fsClose">Kapat</button></div>
+    <input type="search" id="fsSearch" placeholder="Ara: simit, pilav, ayran…">
+    <div class="foods" id="fsList"></div>
+    <div class="row2"><input type="text" id="fsName" placeholder="Listede yoksa: yemek adı"><input type="number" id="fsKcal" placeholder="kcal" inputmode="numeric"></div>
+    <button class="ghost" id="fsCustom">Bu yemeği ekle</button>
+    <p class="note">Seçtiklerin bir öğün olarak açılır, porsiyonu ve kaloriyi orada düzeltebilirsin.</p>
+  </div>
+</div>
+
+<div id="upbar" class="upbar" hidden role="status"><span id="upTxt"></span><button id="upBtn">Yenile</button><button class="x2" id="upX" aria-label="Kapat">×</button></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="food-ai.js"></script>
+<script>
+'use strict';
+const WEB_VERSION = 1;
+const NATIVE = window.Android || null;
+const DAYS = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+const SHORT = ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'];
+const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+const SLOTS = [{ k: 'kahvalti', n: 'Kahvaltı', e: '🍳' }, { k: 'ogle', n: 'Öğle', e: '🥗' }, { k: 'aksam', n: 'Akşam', e: '🍲' }, { k: 'ara', n: 'Ara öğün', e: '🍎' }];
+const MAX_CALL_USD = 0.09;   // bir analizin en kötü durumdaki maliyeti (sınır kontrolü için)
+// Yaklaşık değerler: [ad, porsiyon, kcal, protein, karbonhidrat, yağ]
+const FOODS = [
+  ['Haşlanmış yumurta', '1 adet', 78, 6, 1, 5], ['Sahanda yumurta', '2 adet', 180, 12, 1, 14], ['Menemen', '1 porsiyon', 250, 12, 10, 18],
+  ['Beyaz peynir', '1 dilim (30 g)', 80, 5, 1, 6], ['Kaşar peyniri', '1 dilim (20 g)', 75, 5, 0, 6], ['Zeytin', '10 adet', 60, 0, 1, 6],
+  ['Domates', '1 orta', 22, 1, 5, 0], ['Salatalık', '1 adet', 30, 1, 6, 0], ['Bal', '1 tatlı kaşığı', 21, 0, 6, 0], ['Reçel', '1 tatlı kaşığı', 25, 0, 6, 0],
+  ['Tereyağı', '1 tatlı kaşığı', 36, 0, 0, 4], ['Ekmek', '1 dilim (25 g)', 65, 2, 13, 1], ['Tam buğday ekmeği', '1 dilim', 60, 3, 11, 1],
+  ['Simit', '1 adet', 300, 9, 55, 6], ['Poğaça', '1 adet', 250, 5, 30, 12], ['Börek', '1 dilim', 300, 9, 25, 18], ['Yulaf ezmesi', '40 g', 150, 5, 27, 3],
+  ['Süt', '1 su bardağı', 120, 6, 10, 6], ['Yoğurt', '1 kase (150 g)', 95, 5, 6, 5], ['Ayran', '1 bardak', 70, 3, 4, 4],
+  ['Çay (şekersiz)', '1 bardak', 2, 0, 0, 0], ['Çay (1 şekerli)', '1 bardak', 20, 0, 5, 0], ['Türk kahvesi (şekersiz)', '1 fincan', 5, 0, 1, 0],
+  ['Latte', 'orta boy', 190, 10, 18, 7], ['Portakal suyu', '1 bardak', 110, 2, 26, 0],
+  ['Mercimek çorbası', '1 kase', 180, 9, 25, 5], ['Ezogelin çorbası', '1 kase', 170, 7, 26, 5], ['Tavuk suyu çorba', '1 kase', 120, 8, 12, 4],
+  ['Pirinç pilavı', '1 porsiyon', 280, 5, 50, 6], ['Bulgur pilavı', '1 porsiyon', 220, 6, 40, 5], ['Makarna', '1 porsiyon', 300, 10, 58, 3],
+  ['Kuru fasulye', '1 porsiyon', 280, 14, 35, 9], ['Nohut yemeği', '1 porsiyon', 280, 13, 36, 9], ['Taze fasulye (zeytinyağlı)', '1 porsiyon', 180, 4, 15, 12],
+  ['Tavuk göğsü ızgara', '150 g', 250, 46, 0, 6], ['Köfte', '6 adet', 380, 26, 8, 27], ['Tavuk döner dürüm', '1 adet', 550, 30, 55, 22],
+  ['Et döner', '1 porsiyon', 450, 30, 10, 32], ['Lahmacun', '1 adet', 280, 12, 35, 9], ['Kıymalı pide', 'yarım', 450, 20, 50, 18],
+  ['Karnıyarık', '1 porsiyon', 350, 12, 18, 25], ['Mantı', '1 porsiyon', 500, 20, 60, 18], ['Hamburger', '1 adet', 550, 28, 45, 28],
+  ['Pizza', '1 dilim', 280, 12, 33, 11], ['Patates kızartması', 'orta', 350, 4, 44, 17], ['Kaşarlı tost', '1 adet', 320, 14, 35, 14],
+  ['Mevsim salata (yağlı)', '1 kase', 120, 2, 10, 8], ['Çoban salata', '1 kase', 100, 2, 8, 7], ['Balık ızgara', '1 porsiyon', 300, 35, 0, 17],
+  ['Çiğ köfte dürüm', '1 adet', 350, 8, 65, 6], ['Kumpir', '1 adet', 700, 20, 75, 35],
+  ['Elma', '1 orta', 80, 0, 21, 0], ['Muz', '1 orta', 105, 1, 27, 0], ['Portakal', '1 orta', 70, 1, 17, 0], ['Mandalina', '1 adet', 45, 1, 11, 0],
+  ['Ceviz', '5 adet', 130, 3, 3, 13], ['Fındık', '1 avuç (25 g)', 160, 4, 4, 15], ['Badem', '1 avuç (25 g)', 160, 6, 5, 13],
+  ['Bisküvi', '3 adet', 140, 2, 20, 6], ['Çikolata', '1 bar (40 g)', 210, 3, 24, 12], ['Gofret', '1 adet', 150, 2, 18, 8], ['Cips', 'küçük paket', 210, 3, 22, 13],
+  ['Baklava', '2 dilim', 330, 5, 40, 17], ['Sütlaç', '1 kase', 280, 7, 45, 8], ['Dondurma', '1 top', 140, 2, 17, 7],
+  ['Kola', '330 ml', 140, 0, 35, 0], ['Meyve suyu', '200 ml', 90, 0, 22, 0], ['Enerji içeceği', '250 ml', 110, 0, 28, 0], ['Protein bar', '1 adet', 200, 20, 20, 6]
+];
+
+/* ================= Yardımcılar ================= */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayKey = () => keyOf(new Date());
+const monthKey = () => todayKey().slice(0, 7);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const dayStart = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const NF = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
+const NF1 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 });
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function usd(v) { return '$' + (Math.round(v * 100) / 100).toFixed(2); }
+function haptic(ms) { try { if (NATIVE) NATIVE.vibrate(ms || 15); } catch (e) {} }
+function toast(msg, ms) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, ms || 3000); }
+function slotFor(t) { const h = new Date(t).getHours(); return h < 11 ? 'kahvalti' : h < 16 ? 'ogle' : h < 21 ? 'aksam' : 'ara'; }
+
+/* ================= Veri ================= */
+function fresh() {
+  return { v: 1, created: todayKey(), profile: { sex: 'm', age: 23, height: 175, weight: 75, target: 70, activity: 1.375, pace: 0.5 },
+    settings: { key: '', cap: 5, remindOn: true, times: ['09:00', '13:00', '19:30'] }, meals: [], weights: [], spend: {}, calls: {} };
+}
+function normalize(d) {
+  const f = fresh();
+  if (!d || typeof d !== 'object') d = f;
+  d.profile = Object.assign({}, f.profile, d.profile);
+  d.settings = Object.assign({}, f.settings, d.settings);
+  ['meals', 'weights'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
+  d.spend = d.spend || {}; d.calls = d.calls || {}; d.created = d.created || todayKey();
+  const old = Date.now() - 60 * 86400000;   // eski küçük resimler dosyayı şişirmesin
+  d.meals.forEach(m => { if (m.thumb && m.t < old) m.thumb = ''; });
+  return d;
+}
+function loadData() {
+  let raw = null, d = null;
+  try { raw = NATIVE ? NATIVE.load() : localStorage.getItem('diyet'); } catch (e) {}
+  try { d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; }
+  return normalize(d);
+}
+let D = loadData();
+function save() { const s = JSON.stringify(D); try { if (NATIVE) NATIVE.save(s); else localStorage.setItem('diyet', s); } catch (e) {} }
+
+/* ================= Hesaplar ================= */
+function plan() {
+  const P = D.profile, w = +P.weight, bmr = 10 * w + 6.25 * +P.height - 5 * +P.age + (P.sex === 'f' ? -161 : 5);
+  const tdee = bmr * +P.activity, diff = +P.target - w, floor = P.sex === 'f' ? 1200 : 1500;
+  const delta = +P.pace * 7700 / 7;
+  let goal, mode;
+  if (Math.abs(diff) < 0.5) { goal = tdee; mode = 'koru'; }
+  else if (diff < 0) { goal = Math.max(floor, tdee - delta); mode = 'ver'; }
+  else { goal = tdee + Math.min(500, delta); mode = 'al'; }
+  goal = Math.round(goal / 10) * 10;
+  const protein = Math.round(1.6 * w), fat = Math.round(goal * 0.27 / 9), carbs = Math.max(0, Math.round((goal - protein * 4 - fat * 9) / 4));
+  const weekly = mode === 'ver' ? (tdee - goal) * 7 / 7700 : mode === 'al' ? (goal - tdee) * 7 / 7700 : 0;
+  const weeks = weekly > 0 ? Math.abs(diff) / weekly : 0;
+  return { bmr: Math.round(bmr), tdee: Math.round(tdee), goal, protein, fat, carbs, mode, weekly, weeks, floored: mode === 'ver' && goal === floor };
+}
+function mealsOn(d) { const a = dayStart(d).getTime(); return D.meals.filter(m => m.t >= a && m.t < a + 86400000); }
+function sumItems(items) { return items.reduce((s, i) => ({ k: s.k + (+i.k || 0), p: s.p + (+i.p || 0), c: s.c + (+i.c || 0), f: s.f + (+i.f || 0) }), { k: 0, p: 0, c: 0, f: 0 }); }
+function dayTotals(d) { return sumItems([].concat(...mealsOn(d).map(m => m.items))); }
+function lastWeight() { const w = D.weights.slice().sort((a, b) => a.d < b.d ? 1 : -1)[0]; return w ? w.kg : +D.profile.weight; }
+
+/* ================= Bugün ================= */
+function renderToday() {
+  const now = new Date(), P = plan(), T = dayTotals(now), left = P.goal - T.k;
+  const r = 56, C = 2 * Math.PI * r, frac = Math.min(1, T.k / P.goal);
+  const mac = (n, v, g, col) => `<div class="mac"><b>${n}</b><span>${NF.format(v)} / ${g} g</span><div class="bar"><i style="width:${Math.min(100, v / g * 100)}%;background:${col}"></i></div></div>`;
+  const meals = mealsOn(now).sort((a, b) => a.t - b.t);
+  const groups = SLOTS.map(s => {
+    const ms = meals.filter(m => m.slot === s.k);
+    if (!ms.length) return '';
+    const kc = ms.reduce((x, m) => x + sumItems(m.items).k, 0);
+    return `<div class="slot-h"><span>${s.e} ${s.n}</span><span class="mono">${NF.format(kc)} kcal</span></div>` + ms.map(m => {
+      const t = sumItems(m.items), d = new Date(m.t);
+      return `<button class="meal" data-meal="${m.id}">${m.thumb ? `<img class="thumb" src="${m.thumb}" alt="">` : `<span class="thumb">${s.e}</span>`}<span class="nm">${esc(m.items.map(i => i.n).join(', ') || 'Öğün')}</span><span class="kc">${NF.format(t.k)}</span>` +
+        `<span class="sub">${pad(d.getHours())}:${pad(d.getMinutes())} · P ${NF.format(t.p)} · K ${NF.format(t.c)} · Y ${NF.format(t.f)}${m.src === 'ai' ? ' · 📷' : ''}</span></button>`;
+    }).join('');
+  }).join('');
+  const lw = lastWeight(), weighed = D.weights.some(w => w.d === todayKey());
+  $('#tab-bugun').innerHTML = `
+    <div><div class="greet">${now.getDate()} ${MONTHS[now.getMonth()]} · ${DAYS[now.getDay()]}</div><h1>Bugün</h1></div>
+    <div class="cols">
+      <div class="col">
+        <div class="card hero">
+          <div class="ring"><svg viewBox="0 0 132 132" aria-hidden="true"><circle class="r-trk" cx="66" cy="66" r="${r}"/><circle class="r-val ${left < 0 ? 'over' : ''}" cx="66" cy="66" r="${r}" transform="rotate(-90 66 66)" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - frac)).toFixed(1)}"/></svg>
+            <div class="ctr"><div><b>${NF.format(Math.abs(left))}</b><small>${left < 0 ? 'kcal fazla' : 'kcal kaldı'}</small></div></div></div>
+          <div class="macros">
+            <div class="greet">${NF.format(T.k)} / ${NF.format(P.goal)} kcal</div>
+            ${mac('Protein', T.p, P.protein, 'var(--p)')}${mac('Karbonhidrat', T.c, P.carbs, 'var(--c)')}${mac('Yağ', T.f, P.fat, 'var(--f)')}
+          </div>
+        </div>
+        <div class="actions">
+          <label class="act main"><span>📷</span>Fotoğraf çek<input type="file" accept="image/*" capture="environment" data-photo="1"></label>
+          <label class="act"><span>🖼️</span>Galeriden<input type="file" accept="image/*" data-photo="1"></label>
+          <button class="act" id="manualBtn"><span>✍️</span>Elle ekle</button>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card tab"><span class="label">Öğünler</span>
+          ${groups || '<p class="empty">Henüz öğün yok. Tabağının fotoğrafını çek; kalorisini Claude bulsun.</p>'}
+        </div>
+        <div class="card tab">
+          <div class="card-head"><span class="label">Kilo</span><span class="mono" style="font-weight:700">${NF1.format(lw)} → ${NF1.format(+D.profile.target)} kg</span></div>
+          ${weighed ? '<p class="note">Bugün tartıldın ✓</p>' : `<div class="row2"><input type="number" id="wIn" step="0.1" inputmode="decimal" placeholder="Bugünkü kilon"><button class="ghost" id="wSave">Kaydet</button></div>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ================= Öğün sayfası (fotoğraf + düzenleme) ================= */
+let sheetItems = [], sheetSlot = 'ogle', editingMeal = null, pendingPhoto = null, analyzing = false;
+function openMealSheet(meal) {
+  editingMeal = meal || null;
+  sheetItems = meal ? meal.items.map(i => Object.assign({}, i)) : [];
+  sheetSlot = meal ? meal.slot : slotFor(Date.now());
+  $('#msTitle').textContent = meal ? 'Öğünü düzenle' : 'Yeni öğün';
+  $('#msPhoto').hidden = !(meal && meal.thumb); if (meal && meal.thumb) $('#msPhoto').src = meal.thumb;
+  $('#msAsk').hidden = true; $('#msSpin').hidden = true; $('#msMsg').hidden = true;
+  $('#msEdit').hidden = false; $('#msDel').hidden = !meal; $('#msDel').textContent = 'Öğünü sil'; $('#msDel').dataset.armed = '';
+  $('#msNote').textContent = meal && meal.note ? meal.note : '';
+  renderItems();
+  $('#mealSheet').hidden = false;
+}
+function renderItems() {
+  $('#msItems').innerHTML = sheetItems.length ? sheetItems.map((i, n) => `<div class="irow"><input type="text" value="${esc(i.n)}" data-in="${n}" data-f="n" aria-label="Yemek"><input type="number" value="${Math.round(+i.k || 0)}" data-in="${n}" data-f="k" inputmode="numeric" aria-label="kcal"><button class="x" data-rm="${n}" aria-label="Sil">×</button><span class="por">${esc(i.por || '')}${i.p != null ? ' · P ' + NF.format(i.p) + ' · K ' + NF.format(i.c) + ' · Y ' + NF.format(i.f) : ''}</span></div>`).join('') : '<p class="note">Satır yok.</p>';
+  $('#msSlots').innerHTML = SLOTS.map(s => `<button class="chip" data-slot="${s.k}" aria-pressed="${s.k === sheetSlot}">${s.e} ${s.n}</button>`).join('');
+  $('#msTotal').textContent = NF.format(sumItems(sheetItems).k) + ' kcal';
+}
+function closeMealSheet() { $('#mealSheet').hidden = true; pendingPhoto = null; editingMeal = null; }
+
+async function readPhoto(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const draw = (max, q) => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      return cv.toDataURL('image/jpeg', q);
+    };
+    return { full: draw(1024, 0.85), thumb: draw(160, 0.7) };
+  } finally { URL.revokeObjectURL(url); }
+}
+async function onPhoto(file) {
+  if (!file) return;
+  let p;
+  try { p = await readPhoto(file); } catch (e) { toast('Fotoğraf açılamadı.'); return; }
+  pendingPhoto = p;
+  editingMeal = null; sheetItems = []; sheetSlot = slotFor(Date.now());
+  $('#msTitle').textContent = 'Yeni öğün';
+  $('#msPhoto').src = p.full; $('#msPhoto').hidden = false;
+  $('#msEdit').hidden = true; $('#msSpin').hidden = true; $('#msMsg').hidden = true;
+  $('#msAsk').hidden = false; $('#msHint').value = '';
+  const spent = D.spend[monthKey()] || 0, cap = +D.settings.cap || 5;
+  $('#msCost').textContent = `Bu ay: ${usd(spent)} / ${usd(cap)} · bir analiz genelde 1–3 sent tutar.`;
+  $('#mealSheet').hidden = false;
+}
+async function analyzeNow() {
+  if (analyzing || !pendingPhoto) return;
+  const key = (D.settings.key || '').trim(), spent = D.spend[monthKey()] || 0, cap = +D.settings.cap || 5;
+  const showMsg = (t, bad) => { const m = $('#msMsg'); m.textContent = t; m.className = 'msg' + (bad ? ' bad' : ''); m.hidden = false; };
+  if (!key) { showMsg('Önce Ayarlar\'a Anthropic API anahtarını gir. O zamana kadar "Elle ekle" ile listeden ekleyebilirsin.'); return; }
+  if (spent + MAX_CALL_USD > cap) { showMsg(`Bu ayın sınırına geldin (${usd(spent)} / ${usd(cap)}). Ay başına kadar yemekleri listeden ekleyebilir ya da sınırı Ayarlar'dan değiştirebilirsin.`, true); return; }
+  if (!window.FoodAI) { showMsg('Analiz modülü yüklenemedi. Uygulamayı yeniden aç.', true); return; }
+  analyzing = true;
+  $('#msAsk').hidden = true; $('#msMsg').hidden = true; $('#msSpin').hidden = false;
+  const r = await window.FoodAI.analyze({ apiKey: key, base64: pendingPhoto.full.split(',')[1], mediaType: 'image/jpeg', hint: $('#msHint').value.trim() });
+  analyzing = false;
+  $('#msSpin').hidden = true;
+  if (r.usd) { D.spend[monthKey()] = (D.spend[monthKey()] || 0) + r.usd; D.calls[monthKey()] = (D.calls[monthKey()] || 0) + 1; save(); }
+  if (!r.ok) {
+    const map = { auth: 'API anahtarı geçersiz. Ayarlar\'dan kontrol et.', permission: 'Bu anahtarın izni yok. Anthropic hesabını kontrol et.', rate: 'Çok sık istek gönderildi, biraz bekleyip tekrar dene.',
+      network: 'İnternete bağlanılamadı.', refusal: 'Bu fotoğraf analiz edilemedi. Başka bir açıdan çekmeyi dene.', truncated: 'Yanıt yarım kaldı, tekrar dene.' };
+    const extra = r.error === 'bad' && /credit|balance/i.test(r.message || '') ? 'Anthropic hesabında kredi kalmamış. Billing bölümünden kredi yükle.' : '';
+    showMsg(extra || map[r.error] || ('Bir hata oldu: ' + (r.message || r.error)), true);
+    $('#msAsk').hidden = false;
+    return;
+  }
+  const d = r.data;
+  if (!d.is_food || !d.items.length) { showMsg('Fotoğrafta yemek göremedim. Tabağı biraz daha yakından çekmeyi dene.'); $('#msAsk').hidden = false; return; }
+  sheetItems = d.items.map(i => ({ n: i.name, por: i.portion, k: Math.round(i.kcal), p: Math.round(i.protein_g), c: Math.round(i.carbs_g), f: Math.round(i.fat_g) }));
+  $('#msNote').textContent = (d.note ? d.note + ' · ' : '') + `Bu analiz: ${(r.usd * 100).toFixed(1)} sent · bu ay ${usd(D.spend[monthKey()])}`;
+  $('#msEdit').hidden = false;
+  renderItems();
+  haptic(25);
+}
+function saveMeal() {
+  const items = sheetItems.filter(i => String(i.n).trim() && +i.k >= 0);
+  if (!items.length) { toast('En az bir yemek ekle.'); return; }
+  if (editingMeal) {
+    const m = D.meals.find(x => x.id === editingMeal.id);
+    if (m) { m.items = items; m.slot = sheetSlot; }
+  } else {
+    D.meals.push({ id: uid(), t: Date.now(), slot: sheetSlot, items, src: pendingPhoto ? 'ai' : 'manual', thumb: pendingPhoto ? pendingPhoto.thumb : '', note: pendingPhoto ? $('#msNote').textContent.split(' · Bu analiz')[0] : '' });
+  }
+  save(); closeMealSheet(); renderAll(); toast('Kaydedildi'); haptic(20);
+}
+
+/* ================= Listeden ekleme ================= */
+function renderFoods() {
+  const q = $('#fsSearch').value.trim().toLocaleLowerCase('tr');
+  const list = FOODS.filter(f => !q || f[0].toLocaleLowerCase('tr').includes(q)).slice(0, 60);
+  $('#fsList').innerHTML = list.map(f => `<button class="food" data-food="${FOODS.indexOf(f)}"><span>${esc(f[0])}</span><b>${f[2]} kcal</b><small>${esc(f[1])}</small></button>`).join('') || '<p class="note" style="padding:12px">Bulunamadı. Aşağıdan kendin ekle.</p>';
+}
+function addToSheet(item) {
+  $('#foodSheet').hidden = true;
+  if ($('#mealSheet').hidden) { pendingPhoto = null; openMealSheet(null); }
+  sheetItems.push(item); renderItems();
+}
+
+/* ================= İlerleme ================= */
+function renderProgress() {
+  const P = plan(), ws = D.weights.slice().sort((a, b) => a.d < b.d ? -1 : 1).slice(-30);
+  let wsvg = '';
+  if (ws.length >= 2) {
+    const W = 340, H = 150, L = 34, B = 20, vals = ws.map(w => w.kg).concat([+D.profile.target]);
+    const lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 1);
+    const x = i => L + i * (W - L - 8) / (ws.length - 1), y = v => 8 + (hi - v) / (hi - lo) * (H - B - 8);
+    wsvg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kilo grafiği"><line class="tg" x1="${L}" x2="${W - 4}" y1="${y(+D.profile.target)}" y2="${y(+D.profile.target)}"/>` +
+      `<text x="${W - 6}" y="${y(+D.profile.target) - 4}" text-anchor="end">hedef ${NF1.format(+D.profile.target)}</text>` +
+      `<polyline class="ln" points="${ws.map((w, i) => x(i).toFixed(1) + ',' + y(w.kg).toFixed(1)).join(' ')}"/>` +
+      ws.map((w, i) => `<circle class="dot" cx="${x(i).toFixed(1)}" cy="${y(w.kg).toFixed(1)}" r="3"/>`).join('') +
+      `<text x="${L - 6}" y="${y(hi) + 4}" text-anchor="end">${hi}</text><text x="${L - 6}" y="${y(lo)}" text-anchor="end">${lo}</text></svg>`;
+  }
+  const days = [];
+  for (let i = 13; i >= 0; i--) days.push(addDays(dayStart(new Date()), -i));
+  const kc = days.map(d => dayTotals(d).k), mx = Math.max(P.goal * 1.2, ...kc, 1);
+  const W = 340, H = 130, bw = (W - 10) / 14;
+  let ksvg = `<line class="tg" x1="4" x2="${W - 4}" y1="${(H - 18 - P.goal / mx * (H - 26)).toFixed(1)}" y2="${(H - 18 - P.goal / mx * (H - 26)).toFixed(1)}"/>`;
+  kc.forEach((v, i) => { const h = v / mx * (H - 26); ksvg += `<rect class="b ${v > P.goal ? 'over' : ''}" x="${(6 + i * bw).toFixed(1)}" y="${(H - 18 - h).toFixed(1)}" width="${(bw * 0.7).toFixed(1)}" height="${h.toFixed(1)}" rx="3"/><text x="${(6 + i * bw + bw * 0.35).toFixed(1)}" y="${H - 5}" text-anchor="middle">${SHORT[days[i].getDay()]}</text>`; });
+  const logged = kc.filter(v => v > 0), avg = logged.length ? logged.reduce((a, b) => a + b, 0) / logged.length : 0;
+  const lw = lastWeight(), rest = lw - +D.profile.target, eta = P.weeks > 0 ? addDays(new Date(), Math.round(Math.abs(rest) / (P.weekly || 1) * 7)) : null;
+  const sp = D.spend[monthKey()] || 0, calls = D.calls[monthKey()] || 0;
+  $('#tab-ilerleme').innerHTML = `
+    <h1>İlerleme</h1>
+    <div class="stats3">
+      <div class="stat"><div class="v">${NF1.format(Math.abs(rest))} kg</div><div class="k">${rest > 0 ? 'hedefe kalan' : rest < 0 ? 'almana gereken' : 'hedeftesin'}</div></div>
+      <div class="stat"><div class="v">${avg ? NF.format(avg) : '–'}</div><div class="k">ort. kcal (14 gün)</div></div>
+      <div class="stat"><div class="v">${eta && Math.abs(rest) >= 0.5 ? eta.getDate() + ' ' + MONTHS[eta.getMonth()].slice(0, 3) : '–'}</div><div class="k">tahmini hedef</div></div>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <div class="card tab"><span class="label">Kilo</span>${wsvg ? `<div class="chart">${wsvg}</div>` : '<p class="empty">Grafik için en az iki gün tartıl. Bugün ekranından kilonu girebilirsin.</p>'}</div>
+      </div>
+      <div class="col">
+        <div class="card tab"><span class="label">Son 14 gün kalori</span><div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Günlük kalori">${ksvg}</svg></div><p class="note">Kesikli çizgi günlük hedefin (${NF.format(P.goal)} kcal).</p></div>
+        <div class="card tab"><span class="label">Fotoğraf analizi</span><p class="note">Bu ay ${calls} fotoğraf · ${usd(sp)} / ${usd(+D.settings.cap || 5)}</p><div class="bar" style="height:8px"><i style="width:${Math.min(100, sp / (+D.settings.cap || 5) * 100)}%;background:var(--accent)"></i></div></div>
+      </div>
+    </div>`;
+}
+
+/* ================= Ayarlar ================= */
+function fillSettings() {
+  const P = D.profile, S = D.settings;
+  $('#pSex').value = P.sex; $('#pAge').value = P.age; $('#pH').value = P.height; $('#pW').value = P.weight; $('#pT').value = P.target;
+  $('#pAct').value = String(P.activity); $('#pPace').value = String(P.pace);
+  $('#aiKey').value = S.key || ''; $('#aiCap').value = S.cap;
+  $('#aiSpent').textContent = usd(D.spend[monthKey()] || 0) + ' (' + (D.calls[monthKey()] || 0) + ' foto)';
+  $('#remOn').checked = !!S.remindOn; [0, 1, 2].forEach(i => { $('#rt' + i).value = S.times[i] || ''; });
+  renderCalc();
+  let ver = 'web'; try { if (NATIVE) ver = NATIVE.version(); } catch (e) {}
+  $('#aboutTxt').textContent = 'Diyet ' + ver + ' · ekran sürümü ' + WEB_VERSION + '. Verilerin yalnızca bu telefonda.';
+}
+function renderCalc() {
+  const P = plan();
+  $('#calcBox').innerHTML = `<span>Bazal metabolizma</span><b>${NF.format(P.bmr)} kcal</b><span>Günlük harcaman</span><b>${NF.format(P.tdee)} kcal</b>` +
+    `<span><b style="font-family:inherit">Günlük hedefin</b></span><b style="color:var(--accent)">${NF.format(P.goal)} kcal</b>` +
+    `<span>Protein / Karbonhidrat / Yağ</span><b>${P.protein} / ${P.carbs} / ${P.fat} g</b>` +
+    (P.floored ? `<span style="grid-column:1/-1" class="note">Seçtiğin hız güvenli alt sınırın altına iniyordu; hedef ${NF.format(P.goal)} kcal'de tutuldu (haftada ~${NF1.format(P.weekly)} kg).</span>` : '');
+}
+function syncNative() {
+  if (!NATIVE) return;
+  try { NATIVE.setReminders(!!D.settings.remindOn, D.settings.times.filter(Boolean).join(',')); } catch (e) {}
+}
+
+/* ================= Sekmeler, olaylar ================= */
+let currentTab = 'bugun';
+function renderAll() { renderToday(); renderProgress(); }
+function showTab(t) {
+  currentTab = t;
+  ['bugun', 'ilerleme', 'ayarlar'].forEach(x => { $('#tab-' + x).hidden = x !== t; });
+  document.querySelectorAll('.tabbar button').forEach(b => { if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  if (t === 'ayarlar') fillSettings();
+  window.scrollTo(0, 0);
+}
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.photo) { const f = el.files && el.files[0]; el.value = ''; onPhoto(f); return; }
+  if (el.dataset.in !== undefined) {
+    const i = sheetItems[+el.dataset.in];
+    if (!i) return;
+    if (el.dataset.f === 'k') {
+      const k = Math.max(0, Math.round(+el.value || 0)), r = +i.k > 0 ? k / +i.k : 0;
+      if (i.p != null) ['p', 'c', 'f'].forEach(m => { i[m] = Math.round((+i[m] || 0) * r); });   // makrolar kaloriyle orantılı
+      i.k = k;
+    } else i.n = el.value;
+    renderItems(); return;
+  }
+  if (['pSex', 'pAge', 'pH', 'pW', 'pT', 'pAct', 'pPace'].includes(el.id)) { readProfile(); renderCalc(); return; }
+  if (el.id === 'remOn' || /^rt\d$/.test(el.id)) { D.settings.remindOn = $('#remOn').checked; D.settings.times = [0, 1, 2].map(i => $('#rt' + i).value).filter(Boolean); save(); syncNative(); toast('Hatırlatmalar kaydedildi'); }
+});
+document.addEventListener('input', e => { if (e.target.id === 'fsSearch') renderFoods(); });
+function readProfile() {
+  const P = D.profile, num = (id, lo, hi, d) => { const v = +$('#' + id).value; return isFinite(v) && v >= lo && v <= hi ? v : d; };
+  P.sex = $('#pSex').value; P.age = num('pAge', 14, 90, P.age); P.height = num('pH', 120, 230, P.height);
+  P.weight = num('pW', 30, 300, P.weight); P.target = num('pT', 30, 300, P.target); P.activity = +$('#pAct').value; P.pace = +$('#pPace').value;
+}
+document.addEventListener('click', e => {
+  const el = e.target;
+  const tb = el.closest('.tabbar button'); if (tb) { showTab(tb.dataset.tab); return; }
+  if (el.closest('#manualBtn')) { $('#fsSearch').value = ''; renderFoods(); $('#foodSheet').hidden = false; return; }
+  const ml = el.closest('[data-meal]'); if (ml) { const m = D.meals.find(x => x.id === ml.dataset.meal); if (m) { pendingPhoto = null; openMealSheet(m); } return; }
+  const fd = el.closest('[data-food]'); if (fd) { const f = FOODS[+fd.dataset.food]; addToSheet({ n: f[0], por: f[1], k: f[2], p: f[3], c: f[4], f: f[5] }); return; }
+  const rm = el.closest('[data-rm]'); if (rm) { sheetItems.splice(+rm.dataset.rm, 1); renderItems(); return; }
+  const sl = el.closest('[data-slot]'); if (sl) { sheetSlot = sl.dataset.slot; renderItems(); return; }
+  if (el.closest('#wSave')) {
+    const v = +String($('#wIn').value).replace(',', '.');
+    if (!(v >= 30 && v <= 300)) { toast('Kilonu kg olarak gir.'); return; }
+    D.weights = D.weights.filter(w => w.d !== todayKey()); D.weights.push({ d: todayKey(), kg: Math.round(v * 10) / 10 });
+    D.profile.weight = Math.round(v * 10) / 10; save(); renderAll(); toast('Kilo kaydedildi'); return;
+  }
+});
+$('#msClose').addEventListener('click', closeMealSheet);
+$('#msAnalyze').addEventListener('click', analyzeNow);
+$('#msAddRow').addEventListener('click', () => { $('#fsSearch').value = ''; renderFoods(); $('#foodSheet').hidden = false; });
+$('#msSave').addEventListener('click', saveMeal);
+$('#msDel').addEventListener('click', () => {
+  const b = $('#msDel');
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Emin misin? Silmek için tekrar dokun'; return; }
+  D.meals = D.meals.filter(m => !editingMeal || m.id !== editingMeal.id); save(); closeMealSheet(); renderAll(); toast('Silindi');
+});
+$('#fsClose').addEventListener('click', () => { $('#foodSheet').hidden = true; });
+$('#fsCustom').addEventListener('click', () => {
+  const n = $('#fsName').value.trim(), k = Math.round(+$('#fsKcal').value || 0);
+  if (!n || !(k > 0)) { toast('Yemek adını ve kalorisini yaz.'); return; }
+  $('#fsName').value = ''; $('#fsKcal').value = '';
+  addToSheet({ n, por: '', k });
+});
+$('#saveProfile').addEventListener('click', () => {
+  readProfile();
+  if (!D.weights.some(w => w.d === todayKey())) D.weights.push({ d: todayKey(), kg: +D.profile.weight });
+  save(); renderAll(); renderCalc(); toast('Profil kaydedildi · hedefin ' + NF.format(plan().goal) + ' kcal');
+});
+$('#saveAi').addEventListener('click', () => {
+  D.settings.key = $('#aiKey').value.trim();
+  const c = +$('#aiCap').value; D.settings.cap = isFinite(c) && c >= 0.5 ? Math.min(100, c) : 5;
+  save(); fillSettings(); toast(D.settings.key ? 'Anahtar kaydedildi (yalnızca bu telefonda)' : 'Anahtar silindi');
+});
+
+/* ================= Güncelleme ================= */
+let upAction = null, manualCheck = false;
+function showUpbar(text, btn, action) { $('#upTxt').textContent = text; $('#upBtn').textContent = btn; upAction = action; $('#upbar').hidden = false; }
+function checkUpdates(manual) {
+  if (!NATIVE || typeof NATIVE.checkUpdate !== 'function') { if (manual) toast('Güncelleme kontrolü telefonda çalışır.'); return; }
+  manualCheck = !!manual; if (manual) $('#upStatus').textContent = 'Kontrol ediliyor…';
+  try { NATIVE.checkUpdate(); } catch (e) {}
+}
+window.onUpdateResult = r => {
+  r = r || {};
+  let status;
+  if (r.error) status = 'Kontrol edilemedi (internet bağlantını kontrol et).';
+  else if (r.apk === 'available') { status = 'Yeni uygulama sürümü var.'; showUpbar('Yeni sürüm hazır.', 'Güncelle', () => { save(); toast('İndiriliyor…', 6000); NATIVE.installApk(); }); }
+  else if (r.web === 'ready') { status = 'Güncelleme indirildi.'; showUpbar('Güncelleme hazır.', 'Yenile', () => { save(); NATIVE.applyUpdate(); }); }
+  else status = 'Uygulama güncel.';
+  $('#upStatus').textContent = status; if (manualCheck) toast(status); manualCheck = false;
+};
+window.onInstallResult = r => {
+  if (r === 'permission') { toast('Açılan ekranda Diyet için izni aç, sonra Güncelle\'ye tekrar bas.', 6000); return; }
+  if (r === 'started') { toast('Kurulum ekranı açılıyor. "Güncelle"ye bas, verilerin kalır.', 6000); return; }
+  toast('Güncelleme indirilemedi: ' + String(r).replace(/^error:/, ''), 6000);
+};
+$('#upBtn').addEventListener('click', () => { if (upAction) upAction(); });
+$('#upX').addEventListener('click', () => { $('#upbar').hidden = true; });
+$('#upCheck').addEventListener('click', () => checkUpdates(true));
+
+window.onBack = () => {
+  if (!$('#foodSheet').hidden) { $('#foodSheet').hidden = true; return true; }
+  if (!$('#mealSheet').hidden) { closeMealSheet(); return true; }
+  if (currentTab !== 'bugun') { showTab('bugun'); return true; }
+  return false;
+};
+window.onResumeApp = () => { if ($('#mealSheet').hidden) renderAll(); };
+window.onPauseApp = () => save();
+
+renderAll();
+showTab('bugun');
+syncNative();
+D.webSeen = WEB_VERSION; save();
+try { if (NATIVE && typeof NATIVE.webOk === 'function') NATIVE.webOk(); } catch (e) {}
+setTimeout(() => checkUpdates(false), 2500);
+</script>
+</body>
+</html>
