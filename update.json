@@ -1,0 +1,9 @@
+{
+    "web":  1,
+    "webUrl":  "https://raw.githubusercontent.com/contants/diyet/main/web/index.html",
+    "webMinApk":  1,
+    "apk":  1,
+    "apkUrl":  "https://github.com/contants/diyet/releases/download/v1.0/Diyet.apk",
+    "apkName":  "1.0",
+    "notes":  "Ilk surum: fotograftan kalori, hedef kilo, ogun hatirlatma."
+}
